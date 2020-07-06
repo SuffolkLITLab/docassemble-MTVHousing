@@ -1,0 +1,185 @@
+include:
+  - docassemble.MAVirtualCourt:basic-questions.yml
+---
+mandatory: True
+code: |
+  user_role = "defendant"
+  other_parties.there_are_any = True
+  basic_questions_intro_screen
+  remove_default_intro
+  original_courtdate
+  sheriff_notice
+  reason_for_missing
+  users.gather()
+  users[0].address.address
+  other_parties.gather()
+  docket_number
+  courts[0]
+  answer_yesno
+  if answer_yesno == True:
+    stated_legaldefense
+  elif answer_yesno == False:
+    counterclaim_yesno
+    if counterclaim_yesno == True:
+      stated_legaldefense
+  signature_fields = [] 
+  for user_index in range( len(users) ):
+    one_user = 'users[' + str( user_index ) + '].signature' 
+    signature_fields.append( one_user ) 
+  basic_questions_signature_flow
+  if date_to_file > today():
+    exitscreen_before10
+  else:
+    exitscreen_after10
+  download
+  made_screen
+---
+code: |
+  allowed_courts = [
+      "Boston Municipal Court",
+      "District Court",
+      "Superior Court",
+      "Housing Court",
+      ]
+---
+question: |
+ # Removing a Default Judgment 
+subquestion: |
+ ## If you missed your eviction trial, you can try to get another one.
+ 
+ This is called a Motion to Remove Default and Vacate Judgment
+ 
+ A Default Judgment is a legal term meaning that you failed to appear at your eviction trial and that your landlord won the case via default and can now evict you from his property.
+ 
+ If you have a **good reason** for missing the court date and a **legal defense that may prevent your eviction** you can ask the judge to schedule another trial
+ 
+ Please note: You should NOT use this form if you have defaulted on a motion after having signed an agreement. If that is your situation you can consider filing a Motion for Reconsideration or a Motion for Rehearing.
+ 
+ PLEASE PROCEED WITH THE INTERVIEW IF THIS APPLIES TO YOU
+ 
+ To get started, press **Continue**
+continue button field: remove_default_intro
+---
+question: |
+ What was the date of the Default Judgement?
+fields:
+ - Court Date: original_courtdate
+   datatype: date
+---
+code: |
+ date_to_file = original_courtdate.plus(days=11)
+---
+question: |
+  Have you received a notice from a sheriff/constable about being removed from your home or apartment?
+yesno: sheriff_notice
+---
+question: |
+ What is the reason you missed your hearing?
+fields: 
+  - no label: reason_for_missing
+    choices:
+      - I never received notice of the court date: I never recieved notice of the court date.
+      - My landlord told me that I didn't need to go to court: My landlord told me that i didnt need to go to court.
+      - I was late and my case had already been called: I was late and my case had already been called.
+      - I didn't make it to court because someone in my household was sick or died: I didnt make it to court because someone in my household was sick or died.
+      - Other: Other.
+  - Other: elaborate
+    datatype: area
+    show if: 
+      variable: reason_for_missing 
+      is: Other.
+---
+question: |
+ Enter the following information:
+fields: 
+ - Docket Number: docket_number
+auto terms:
+  Docket Number: |
+    Found on the top and center of your notice of default judgement.
+---
+question: |
+ Have you already filed an answer with the court?
+yesno: answer_yesno
+--- 
+question: |
+ Are you planning on filing an answer?
+subquestion: |
+ **What is an answer?**
+ An Answer is a document you file with the court saying why you should not be evicted.   An Answer also can include counterclaims you may have against your landlord.
+
+ It is recommended that you file an Answer with your Motion.  To learn more about how to defend against an Eviction [go here](${ url_of('https://www.masslegalhelp.org/housing/lt1-pullout-12-evictions') })
+yesno: counterclaim_yesno
+---
+question: |
+  Please state why you should not be evicted:
+fields: 
+  - no label: stated_legaldefense
+    input type: area
+---
+#question: |
+#  When would you like to schedule this motion?
+#fields: 
+#  - Date: new_date
+#    datatype: date
+#  - Time: new_time
+#    datatype: time
+#subquestion: |
+#  It is important that you first contact the court and find out when they will allow you to schedule this motion hearing. (Some courts only allow them on certain days at certain times. Some courts also require that you give at least 7 days notice of when the hearing will take place. It varies from court to court)
+---
+code: |
+  user.signature
+---
+continue button field: exitscreen_before10
+question: |
+ Thank you for completing this interview. 
+subquestion: |
+  You can download your document on the next screen. Please download it and follow the directions below.
+  
+  **Your response is due ${ date_to_file }.**
+  
+  If you haven't filed an Answer to court yet please bring your Answer attached to this document.
+  
+  If you are about to be evicted ask a judge to **stay the execution** (stop the eviction) until this motion is heard. 
+
+  Circle in section 7 to indicate whether you **hand-delivered** or **mailed** this motion to your landlord, and write in the date you did this.
+  
+  **If you have received a Notice of Removal from a sheriff/constable, please fill in the information in section 9.**
+  
+  File the original Motion and your Answer with the court and deliver a copy to your landlord or the landlord's lawyer. Keep a copy for yourself. It is recommended that you hand deliver these documents in this booklet because the mail may be too slow, and most courts will require that you give at least 7 days notive of the hearing date. 
+
+  **PLEASE BE SURE TO BRING TWO ADDITIONAL COPIES OF THIS COMPLETED MOTION AND ANSWER TO THE COURT**
+---
+continue button field: exitscreen_after10
+question: |
+ Thank you for completing this interview. 
+subquestion: |
+  You can download your document on the next screen. Please download it and follow the directions below.
+  
+  Fill in the rest of the information required on the document. 
+ 
+  If you haven't filed an Answer to court yet please bring your Answer attached to this document.
+
+  You are filing 10 days after the default judgment which means you must ask a judge to **stay the execution** (stop the eviction) until this motion is heard.
+  
+  Circle in section 7 to indicate whether you hand-delivered or mailed this motion to your landlord, and write in the date you did this.
+  
+    **If you have received a Notice of Removal from a sheriff/constable, please fill in the information in section 9.**
+  
+   File the original Motion and your Answer with the court and deliver a copy to your landlord or the landlord's lawyer. Keep a copy for yourself. It is recommended that you hand deliver these documents in this booklet because the mail may be too slow, and most courts will require that you give at least 7 days notive of the hearing date. 
+
+  **PLEASE BE SURE TO BRING TWO ADDITIONAL COPIES OF THIS COMPLETED MOTION AND ANSWER TO THE COURT**
+---
+continue button field: download
+question: |
+  Your forms are ready to download.
+subquestion: |
+  ${ motion_attachment } 
+attachment code: motion_attachment
+---
+attachment: 
+  docx template file: Motion_To_Vacate_Form.docx
+  variable name: motion_attachment
+---
+event: made_screen
+question: |
+  If you need help or more information regarding the filing of an answer please see more information from the Massachusetts Defense for Evictions (MADE) [here](${ url_of('https://www.gbls.org/MADE') })
