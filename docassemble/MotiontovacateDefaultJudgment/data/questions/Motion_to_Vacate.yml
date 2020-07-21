@@ -6,7 +6,10 @@ code: |
   user_role = "defendant"
   other_parties.there_are_any = True
   basic_questions_intro_screen
-  remove_default_intro
+  if sign_agreement:
+    if default_agreement:
+      defaulted_after_agreement
+  # remove_default_intro
   original_courtdate
   sheriff_notice
   reason_for_missing
@@ -43,25 +46,47 @@ code: |
       ]
 ---
 question: |
- # Removing a Default Judgment 
+  Removing a Default Judgment 
 subquestion: |
- ## If you missed your eviction trial, you can try to get another one.
+  If you missed your eviction trial, your landlord won the case automatically, by default. And the judge gave your landlord permission to evict you. 
+  
+  You can ask the court to give you another trial and take back the decision to let your landlord evict you if: 
+  
+  * you missed the trial for a good reason, and
+  * you also have a good explanation for why your landlord should not evict you.
+  
+  If you can show you had a good reason and a good explanation, file a {Motion to Remove Default and Vacate Judgment} to ask the court to schedule another trial. 
+  
+  Note: It is best to file this motion within 11 days of the trial date you missed. You can still file if it is later, but you have more rights if you file within the 11 days. 
  
- This is called a Motion to Remove Default and Vacate Judgment
- 
- A Default Judgment is a legal term meaning that you failed to appear at your eviction trial and that your landlord won the case via default and can now evict you from his property.
- 
- If you have a **good reason** for missing the court date and a **legal defense that may prevent your eviction** you can ask the judge to schedule another trial
- 
- Please note: You should NOT use this form if you have defaulted on a motion after having signed an agreement. If that is your situation you can consider filing a Motion for Reconsideration or a Motion for Rehearing.
- 
- PLEASE PROCEED WITH THE INTERVIEW IF THIS APPLIES TO YOU
- 
- To get started, press **Continue**
-continue button field: remove_default_intro
+  **Important:**
+  You cannot use this motion if already signed an agreement and "defaulted on a motion." 
+  
+  If that is your situation you can consider filing a Motion for Reconsideration or a Motion for Rehearing.
+
+fields:
+  - "Did you already sign an agreement with your landlord?": sign_agreement
+    datatype: yesnoradio
+  - "Did you default on a motion afterwards?": default_agreement
+    datatype: yesnoradio
+    show if: sign_agreement
+---
+id: defaulted after agreement
+event: defaulted_after_agreement
+question: |
+  Default on motion after signing an agreement?
+subquestion: |
+  The Motion to Remove Default and Vacate Judgment is not the right form for you. 
+  
+  You may need to file a Motion for Reconsideration or a Motion for Rehearing.
+buttons:
+  - Exit: exit
+  - Restart: restart
 ---
 question: |
- What was the date of the Default Judgement?
+ What was the date of the trial you missed?
+subquestion: |
+  This is the date you lost your case. The judge made a decision, a judgment, that you lost your case by default because you could not be at the trial. This is a "default judgment." 
 fields:
  - Court Date: original_courtdate
    datatype: date
@@ -70,27 +95,35 @@ code: |
  date_to_file = original_courtdate.plus(days=11)
 ---
 question: |
-  Have you received a notice from a sheriff/constable about being removed from your home or apartment?
+  Did you get a notice from a sheriff or a constable?
+subquestion: |
+  Did a sheriff or constable send you a notice that says they are going to "remove" or move you and your things out of your home on a certain date?
 yesno: sheriff_notice
 ---
 question: |
  What is the reason you missed your hearing?
 fields: 
   - no label: reason_for_missing
+    datatype: checkboxes
     choices:
       - I never received notice of the court date: I never recieved notice of the court date.
       - My landlord told me that I didn't need to go to court: My landlord told me that i didnt need to go to court.
       - I was late and my case had already been called: I was late and my case had already been called.
       - I didn't make it to court because someone in my household was sick or died: I didnt make it to court because someone in my household was sick or died.
-      - Other: Other.
+      - Other: Other
   - Other: elaborate
     datatype: area
-    show if: 
-      variable: reason_for_missing 
-      is: Other.
+    js show if: 
+      reason_for_missing['other'] 
 ---
+comment: |
+  top Center? of notice?
+id: docket number
 question: |
- Enter the following information:
+ What is the docket number?
+subquestion: |
+  The docket number is the number the court uses to identify your case. Look at the top right corner of the judgment you got from the court, or the top right corner of almost any papers you got from the court. You should see it there. 
+  ###  Get an image - CR
 fields: 
  - Docket Number: docket_number
 auto terms:
@@ -98,7 +131,7 @@ auto terms:
     Found on the top and center of your notice of default judgement.
 ---
 question: |
- Have you already filed an answer with the court?
+ Did you already file an answer with the court?
 yesno: answer_yesno
 --- 
 question: |
@@ -111,7 +144,7 @@ subquestion: |
 yesno: counterclaim_yesno
 ---
 question: |
-  Please state why you should not be evicted:
+  Explain why you should not be evicted:
 fields: 
   - no label: stated_legaldefense
     input type: area
