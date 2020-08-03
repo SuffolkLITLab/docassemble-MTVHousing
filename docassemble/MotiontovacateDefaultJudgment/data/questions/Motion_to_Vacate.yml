@@ -3,21 +3,22 @@ include:
 ---
 mandatory: True
 code: |
-  user_role = "defendant"
-  other_parties.there_are_any = True
   basic_questions_intro_screen
   remove_default_intro
   original_courtdate
   sheriff_notice
+  if sheriff_notice == True:
+    removal_date
   reason_for_missing
   users.gather()
   users[0].address.address
-  other_parties.gather()
+  other_party
   docket_number
   courts[0]
   answer_yesno
   if answer_yesno == True:
     stated_legaldefense
+    counterclaim_yesno = False
   elif answer_yesno == False:
     counterclaim_yesno
     if counterclaim_yesno == True:
@@ -42,39 +43,68 @@ code: |
       "Housing Court",
       ]
 ---
+id: intro screen
 question: |
  # Removing a Default Judgment 
 subquestion: |
- ## If you missed your eviction trial, you can try to get another one.
+ If you missed your eviction trial and were defaulted, you can try to get another one.
  
  This is called a Motion to Remove Default and Vacate Judgment
  
- A Default Judgment is a legal term meaning that you failed to appear at your eviction trial and that your landlord won the case via default and can now evict you from his property.
+ A default judgment is a legal term meaning that you failed to appear at your eviction trial and that your landlord won the case via default and can now evict you from his property.
  
- If you have a **good reason** for missing the court date and a **legal defense that may prevent your eviction** you can ask the judge to schedule another trial
+ If you have a **good reason** for missing the court date and a **legal defense that may prevent your eviction** you can ask the Judge to schedule another trial
  
- Please note: You should NOT use this form if you have defaulted on a motion after having signed an agreement. If that is your situation you can consider filing a Motion for Reconsideration or a Motion for Rehearing.
+ Before we begin it is important that you find your Judgment of Summary Process order from the court as there is information that you will need from it. An example of the order can be seen below.
  
- PLEASE PROCEED WITH THE INTERVIEW IF THIS APPLIES TO YOU
+ [FILE default_order.png, 100%]
  
- To get started, press **Continue**
+ To get started, tap **Next**
 continue button field: remove_default_intro
 ---
+id: original date
 question: |
- What was the date of the Default Judgement?
+ What was the date of the Default Judgment?
+subquestion: |
+  The date can be found on the default order here:
+  
+  [FILE default_order_date.png, 100%]
 fields:
- - Court Date: original_courtdate
+ - Date: original_courtdate
    datatype: date
 ---
 code: |
  date_to_file = original_courtdate.plus(days=11)
 ---
+id: other party info
 question: |
-  Have you received a notice from a sheriff/constable about being removed from your home or apartment?
+  What is the name of the plaintiff in this case?
+subquestion: |
+  The name of the plaintiff can be found on your court order here:
+  
+  [FILE default_order_plaintiff.png, 100%]
+fields:
+  - Plaintiff: other_party
+---
+id: removal notice
+question: |
+  Have you also received a notice from a sheriff or constable about being removed from your home or apartment?
+subquestion: |
+  This is a notice you may have recieved which states that a sheriff or constabl will evict you from your residence on a certain day. 
 yesno: sheriff_notice
 ---
+id: removal notice date and time
 question: |
- What is the reason you missed your hearing?
+  What is the date and time that the sheriff or constable says you will be removed?
+fields: 
+  - Date: removal_date
+    datatype: date
+  - Time: removal_time
+    datatype: time
+---
+id: reason for missing
+question: |
+ Why did you miss your hearing?
 fields: 
   - no label: reason_for_missing
     choices:
@@ -89,18 +119,25 @@ fields:
       variable: reason_for_missing 
       is: Other.
 ---
+id: docket number
 question: |
- Enter the following information:
+ Enter the following information
 fields: 
  - Docket Number: docket_number
-auto terms:
-  Docket Number: |
-    Found on the top and center of your notice of default judgement.
+help:
+  label: |
+    Where can I find my docket number?
+  content: |
+    The docket number can be found on the top and center of the order sheet here:
+    
+    [FILE default_order_docket.png, 100%]
 ---
+id: previous answer filed
 question: |
  Have you already filed an answer with the court?
 yesno: answer_yesno
 --- 
+id: filing a future answer
 question: |
  Are you planning on filing an answer?
 subquestion: |
@@ -110,12 +147,14 @@ subquestion: |
  It is recommended that you file an Answer with your Motion.  To learn more about how to defend against an Eviction [go here](${ url_of('https://www.masslegalhelp.org/housing/lt1-pullout-12-evictions') })
 yesno: counterclaim_yesno
 ---
+id: legal defense
 question: |
-  Please state why you should not be evicted:
+  Please state why you should not be evicted
 fields: 
   - no label: stated_legaldefense
     input type: area
 ---
+#id: new court date
 #question: |
 #  When would you like to schedule this motion?
 #fields: 
@@ -129,46 +168,29 @@ fields:
 code: |
   user.signature
 ---
+id: exit screen 1
 continue button field: exitscreen_before10
 question: |
  Thank you for completing this interview. 
 subquestion: |
-  You can download your document on the next screen. Please download it and follow the directions below.
+  You can download your document on the next screen. Please download it and follow the directions on the attached cover sheet
   
   **Your response is due ${ date_to_file }.**
   
   If you haven't filed an Answer to court yet please bring your Answer attached to this document.
-  
-  If you are about to be evicted ask a judge to **stay the execution** (stop the eviction) until this motion is heard. 
-
-  Circle in section 7 to indicate whether you **hand-delivered** or **mailed** this motion to your landlord, and write in the date you did this.
-  
-  **If you have received a Notice of Removal from a sheriff/constable, please fill in the information in section 9.**
-  
-  File the original Motion and your Answer with the court and deliver a copy to your landlord or the landlord's lawyer. Keep a copy for yourself. It is recommended that you hand deliver these documents in this booklet because the mail may be too slow, and most courts will require that you give at least 7 days notive of the hearing date. 
-
-  **PLEASE BE SURE TO BRING TWO ADDITIONAL COPIES OF THIS COMPLETED MOTION AND ANSWER TO THE COURT**
 ---
+id: exit screen 2
 continue button field: exitscreen_after10
 question: |
  Thank you for completing this interview. 
 subquestion: |
-  You can download your document on the next screen. Please download it and follow the directions below.
-  
-  Fill in the rest of the information required on the document. 
+  You can download your document on the next screen. Please download it and follow the directions on the attached cover sheet.
  
   If you haven't filed an Answer to court yet please bring your Answer attached to this document.
 
   You are filing 10 days after the default judgment which means you must ask a judge to **stay the execution** (stop the eviction) until this motion is heard.
-  
-  Circle in section 7 to indicate whether you hand-delivered or mailed this motion to your landlord, and write in the date you did this.
-  
-    **If you have received a Notice of Removal from a sheriff/constable, please fill in the information in section 9.**
-  
-   File the original Motion and your Answer with the court and deliver a copy to your landlord or the landlord's lawyer. Keep a copy for yourself. It is recommended that you hand deliver these documents in this booklet because the mail may be too slow, and most courts will require that you give at least 7 days notive of the hearing date. 
-
-  **PLEASE BE SURE TO BRING TWO ADDITIONAL COPIES OF THIS COMPLETED MOTION AND ANSWER TO THE COURT**
 ---
+id: download
 continue button field: download
 question: |
   Your forms are ready to download.
