@@ -6,23 +6,20 @@ code: |
   basic_questions_intro_screen
   remove_default_intro
   original_courtdate
-  sheriff_notice
-  if sheriff_notice == True:
-    removal_date
   reason_for_missing
   users.gather()
   users[0].address.address
   other_party
   docket_number
   courts[0]
-  answer_yesno
-  if answer_yesno == True:
+  if answer_yesno:
     stated_legaldefense
     counterclaim_yesno = False
-  elif answer_yesno == False:
-    counterclaim_yesno
-    if counterclaim_yesno == True:
+  else:
+    if counterclaim_yesno:
       stated_legaldefense
+  if sheriff_notice:
+    removal_date
   signature_fields = [] 
   for user_index in range( len(users) ):
     one_user = 'users[' + str( user_index ) + '].signature' 
@@ -47,30 +44,30 @@ id: intro screen
 question: |
  # Removing a Default Judgment 
 subquestion: |
- If you missed your eviction trial and were defaulted, you can try to get another one.
+ If you missed your eviction trial, your landlord won the case automatically, by default. And the judge gave your landlord permission to evict you. 
+  
+  You can ask the court to give you another trial and take back the decision to let your landlord evict you if: 
+  
+  * you missed the trial for a good reason, and
+  * you also have a good explanation for why your landlord should not evict you.
+  
+  If you can show you had a good reason and a good explanation, file a Motion to Remove Default and Vacate Judgment to ask the court to schedule another trial.
+  
+  You will need your default judgment to answer the questions that help you fill out your motion. 
  
- This is called a Motion to Remove Default and Vacate Judgment
+ [FILE default_order.png, 100%, default judgment]
  
- A default judgment is a legal term meaning that you failed to appear at your eviction trial and that your landlord won the case via default and can now evict you from his property.
- 
- If you have a **good reason** for missing the court date and a **legal defense that may prevent your eviction** you can ask the Judge to schedule another trial
- 
- Before we begin it is important that you find your Judgment of Summary Process order from the court as there is information that you will need from it. An example of the order can be seen below.
- 
- [FILE default_order.png, 100%]
- 
- To get started, tap **Next**
 continue button field: remove_default_intro
 ---
 id: original date
 question: |
- What was the date of the Default Judgment?
+ What is the date of the Default Judgment?
 subquestion: |
-  The date can be found on the default order here:
+  Look at the judgment:
   
-  [FILE default_order_date.png, 100%]
+  [FILE default_order_date.png, 100%, default judgment with date circled]
 fields:
- - Date: original_courtdate
+ - Date Judgment Entered: original_courtdate
    datatype: date
 ---
 code: |
@@ -78,40 +75,50 @@ code: |
 ---
 id: other party info
 question: |
-  What is the name of the plaintiff in this case?
+  What is the plaintiff's name in your case?
 subquestion: |
-  The name of the plaintiff can be found on your court order here:
+  Look at your default judgment. 
   
-  [FILE default_order_plaintiff.png, 100%]
+  [FILE default_order_plaintiff.png, 100%, default judgment plaintiff box circled]
 fields:
   - Plaintiff: other_party
 ---
 id: removal notice
 question: |
-  Have you also received a notice from a sheriff or constable about being removed from your home or apartment?
+  Did you get a notice from a sheriff or constable that says you will be "removed"?
 subquestion: |
-  This is a notice you may have recieved which states that a sheriff or constabl will evict you from your residence on a certain day. 
+  This is a notice that says a sheriff or constable have scheduled a date and time to move you and your things out of your home.
+  
+  If you got one of these notices, you can ask the judge to give you more time before the sheriff or constable moves you out. This is called asking for a "stay of execution."
+  
+  Did you get a notice of removal from a sheriff or constable?
+  
 yesno: sheriff_notice
 ---
 id: removal notice date and time
 question: |
-  What is the date and time that the sheriff or constable says you will be removed?
+  When does the notice say the sheriff or constable will move you out?
+subquestion: |
+  Look at the notice of removal from the sheriff or constable. 
 fields: 
   - Date: removal_date
     datatype: date
   - Time: removal_time
     datatype: time
+    help: |
+      Enter the time on the notice. Remmember to include AM or PM. 
 ---
 id: reason for missing
 question: |
  Why did you miss your hearing?
 fields: 
   - no label: reason_for_missing
+    input type: radio
     choices:
-      - I never received notice of the court date: I never recieved notice of the court date.
-      - My landlord told me that I didn't need to go to court: My landlord told me that i didnt need to go to court.
-      - I was late and my case had already been called: I was late and my case had already been called.
-      - I didn't make it to court because someone in my household was sick or died: I didnt make it to court because someone in my household was sick or died.
+      - I never got a notice about the court date: I never recieved notice of the court date.
+      - My landlord told me I did not need to go to court.: My landlord told me I did not need to go to court.
+      - I was late and my case had already been called.: I was late and my case had already been called.
+      - I did not make it to court because someone in my household was sick or died: I didnt make it to court because someone in my household was sick or died.
       - Other: Other.
   - Other: elaborate
     datatype: area
@@ -121,38 +128,71 @@ fields:
 ---
 id: docket number
 question: |
- Enter the following information
+ What is the docket number for your case?
+subquestion: |
+  Look at your default judgment. 
+  
+  [FILE default_order_docket.png, 100%, default judgment docket number circled.]
 fields: 
  - Docket Number: docket_number
 help:
   label: |
     Where can I find my docket number?
   content: |
-    The docket number can be found on the top and center of the order sheet here:
+    The docket number is at the top and center of the page.
     
     [FILE default_order_docket.png, 100%]
 ---
 id: previous answer filed
 question: |
- Have you already filed an answer with the court?
+  Did you already file an Answer with the court?
+subquestion: |
+  **What is an Answer?**
+  
+  An Answer is a document you file with the court that explains why you should not be evicted.  Your Answer can also include {counterclaims} you may have against your landlord.
+  
+  Did you already file one?
 yesno: answer_yesno
+terms:
+  counterclaims: |
+    You can sue your landlord for money as part of your eviction case if your claims are related to your tenancy. These claims are called "counterclaims" if you raise them during an eviction case. They are claims for money. Common counterclaims tenants can bring against their landlord in an eviction case are:
+    
+    * Your landlord does not keep your apartment in good condition.
+    * Your landlord interferes with your use and enjoyment of your apartment or your utilities.
+    * Your landlord has not obeyed the security deposit law.
+    
+    There are others - See [Defenses and Counterclaims](https://www.masslegalhelp.org/housing/lt1-chapter-12-legal-defenses-counterclaims#counterclaims)
 --- 
 id: filing a future answer
 question: |
- Are you planning on filing an answer?
+ Are you planning to file an Answer?
 subquestion: |
- **What is an answer?**
- An Answer is a document you file with the court saying why you should not be evicted.   An Answer also can include counterclaims you may have against your landlord.
+ It is a good idea to file an Answer with your motion.  See [Facing an Eviction](${ url_of('https://www.masslegalhelp.org/housing/lt1-pullout-12-evictions') })
 
- It is recommended that you file an Answer with your Motion.  To learn more about how to defend against an Eviction [go here](${ url_of('https://www.masslegalhelp.org/housing/lt1-pullout-12-evictions') })
 yesno: counterclaim_yesno
 ---
 id: legal defense
 question: |
-  Please state why you should not be evicted
+  Tell the judge why you should not be evicted
+subquestion: |
+  % if answer_yesno:
+  Write a few short sentences that sum up the reason you gave in your Answer.
+  % else:
+  Write a few short sentences that sum up the reason you plan to give in your Answer.
+  % endif
 fields: 
   - no label: stated_legaldefense
     input type: area
+help:
+  label: | 
+    What can I say?
+  content: |
+    * You were living with bad conditions and you are waiting for the landlord to make needed repairs
+    * The landlord broke the terms of your agreement, or lease.
+    * The landlord is getting back at you because you reported them for something.
+    * The landlord is discriminating against you.
+        
+    See [Defenses and Counterclaims](https://www.masslegalhelp.org/housing/lt1-chapter-12-legal-defenses-counterclaims)
 ---
 #id: new court date
 #question: |
@@ -171,29 +211,37 @@ code: |
 id: exit screen 1
 continue button field: exitscreen_before10
 question: |
- Thank you for completing this interview. 
+ Your Motion to Vacate Default Judgment is done! 
 subquestion: |
-  You can download your document on the next screen. Please download it and follow the directions on the attached cover sheet
+  You can download your motion on the next screen.
   
+  The file you download includes instructions for next steps.
+    
   **Your response is due ${ date_to_file }.**
   
-  If you haven't filed an Answer to court yet please bring your Answer attached to this document.
+  % if not answer_yesno:
+  If you have not yet filed an Answer. ---Gordon?  bring your Answer attached to this document.
+  % endif
 ---
 id: exit screen 2
 continue button field: exitscreen_after10
 question: |
  Thank you for completing this interview. 
 subquestion: |
-  You can download your document on the next screen. Please download it and follow the directions on the attached cover sheet.
- 
-  If you haven't filed an Answer to court yet please bring your Answer attached to this document.
+  You can download your motion on the next screen.
+  
+  The file you download includes instructions for next steps.
+    
+  % if not answer_yesno:
+  If you have not yet filed an Answer. ---Gordon?  bring your Answer attached to this document.
+  % endif
 
   You are filing 10 days after the default judgment which means you must ask a judge to **stay the execution** (stop the eviction) until this motion is heard.
 ---
 id: download
 continue button field: download
 question: |
-  Your forms are ready to download.
+  Your forms are ready to download
 subquestion: |
   ${ motion_attachment } 
 attachment code: motion_attachment
