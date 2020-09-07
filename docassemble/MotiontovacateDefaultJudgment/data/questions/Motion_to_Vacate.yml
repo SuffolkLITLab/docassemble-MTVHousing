@@ -4,33 +4,40 @@ include:
 mandatory: True
 code: |
   basic_questions_intro_screen
-  remove_default_intro
-  original_courtdate
-  reason_for_missing
-  users.gather()
-  users[0].address.address
-  other_party
-  docket_number
-  courts[0]
-  if answer_yesno:
-    stated_legaldefense
-    counterclaim_yesno = False
+  if not have_judgment:
+    no_judgment
   else:
-    if counterclaim_yesno:
-      stated_legaldefense
-  if sheriff_notice:
-    removal_date
-  signature_fields = [] 
-  for user_index in range( len(users) ):
-    one_user = 'users[' + str( user_index ) + '].signature' 
-    signature_fields.append( one_user ) 
-  basic_questions_signature_flow
-  if date_to_file > today():
-    exitscreen_before10
-  else:
-    exitscreen_after10
-  download
-  made_screen
+   other_party
+   users[0].name.first
+   original_courtdate
+   reason_for_missing
+   docket_number
+   courts[0]
+   if answer_yesno:
+     stated_legaldefense
+     counterclaim_yesno = False
+   else:
+     if counterclaim_yesno:
+       stated_legaldefense
+     else:
+       stated_legaldefense = ''
+   if sheriff_notice:
+     removal_date
+   users[0].address.address
+   signature_fields = ['users[0].signature']
+   #for user_index in range( len(users) ):
+   #  one_user = 'users[' + str( user_index ) + '].signature' 
+   #  signature_fields.append( one_user )
+   users.there_is_another = False
+   basic_questions_signature_flow
+   users[0].signature
+   # if date_to_file > today():
+   #   exitscreen_before10
+   # else:
+   #   exitscreen_after10
+   exitscreen
+   download
+   # made_screen
 ---
 code: |
   allowed_courts = [
@@ -40,32 +47,55 @@ code: |
       "Housing Court",
       ]
 ---
+code: |
+  interview_short_title = "Ask the court to remove the Default Judgment in my eviction case"
+---
 id: intro screen
 question: |
- # Removing a Default Judgment 
+ Removing a default judgment 
 subquestion: |
- If you missed your eviction trial, your landlord won the case automatically, by default. And the judge gave your landlord permission to evict you. 
-  
-  You can ask the court to give you another trial and take back the decision to let your landlord evict you if: 
-  
-  * you missed the trial for a good reason, and
-  * you also have a good explanation for why your landlord should not evict you.
-  
-  If you can show you had a good reason and a good explanation, file a Motion to Remove Default and Vacate Judgment to ask the court to schedule another trial.
-  
-  You will need your default judgment to answer the questions that help you fill out your motion. 
+ If you got a Judgment of Summary Process by Default, it means you missed an eviction hearing and {the plaintiff} won their case to evict you.
  
  [FILE default_order.png, 100%, default judgment]
  
-continue button field: remove_default_intro
+  You can ask the court to take back the decision to let the plaintiff evict you if: 
+  
+  * you missed the hearing for a good reason, and
+  *	you also have {a defense} for why your landlord should not evict you.
+
+  We can help you file a Motion to Remove Default and Vacate Judgment.   If the court allows your motion, you start your eviction case over, from the beginning.
+  
+  You need your Judgment of Summary Process by Default in front of you to complete this motion. 
+ 
+ Do you have your Judgment in front of you?
+yesno: have_judgment 
+# continue button field: remove_default_intro
+terms: 
+  the plaintiff: |
+    The plaintiff is the person or business who is trying to evict you.
+  a defense: |
+    Defenses are the [legal reasons](https://www.masslegalhelp.org/housing/lt1-chapter-12-legal-defenses-counterclaims#defensesprevent) why you should not be evicted.
+---
+id: kickout no judgment
+event: no_judgment
+question: |
+  You need your Judgment of Summary Process by Default
+subquestion: |
+  To answer the questions or fill out a Motion to Vacate Default Judgment you need information that is in the Judgment of Summary Process by Default. 
+  
+  If you do not have the judgment, call the clerk at the court that heard your case. Ask them how you can get a copy of the judgment.
+buttons:
+  - Exit: exit
+    url: https://masslegalhelp.org/housing/lt1-chapter-12-challenging-court-ordered-eviction
+  - Restart: restart
 ---
 id: original date
 question: |
  What is the date of the Default Judgment?
 subquestion: |
-  Look at the judgment:
+  ${users[0].familiar()}, look at the judgment you got:
   
-  [FILE default_order_date.png, 100%, default judgment with date circled]
+  [FILE default_order_date.png, 100%, default judgment with date top center circled]
 fields:
  - Date Judgment Entered: original_courtdate
    datatype: date
@@ -81,13 +111,13 @@ subquestion: |
   
   [FILE default_order_plaintiff.png, 100%, default judgment plaintiff box circled]
 fields:
-  - Plaintiff: other_party
+  - Plaintiff(s) who are parties to this Judgment: other_party
 ---
 id: removal notice
 question: |
   Did you get a notice from a sheriff or constable that says you will be "removed"?
 subquestion: |
-  This is a notice that says a sheriff or constable have scheduled a date and time to move you and your things out of your home.
+  This is a notice that says a sheriff or constable scheduled a date and time to move you and your things out of your home.
   
   If you got one of these notices, you can ask the judge to give you more time before the sheriff or constable moves you out. This is called asking for a "stay of execution."
   
@@ -147,11 +177,11 @@ id: previous answer filed
 question: |
   Did you already file an Answer with the court?
 subquestion: |
-  **What is an Answer?**
+  An Answer is a document you file with the court that explains why you should not be evicted.  
   
-  An Answer is a document you file with the court that explains why you should not be evicted.  Your Answer can also include {counterclaims} you may have against your landlord.
+  Your Answer can also include {counterclaims} you may have against your landlord.
   
-  Did you already file one?
+   ${users[0].familiar()}, did you already file your Answer?
 yesno: answer_yesno
 terms:
   counterclaims: |
@@ -167,7 +197,13 @@ id: filing a future answer
 question: |
  Are you planning to file an Answer?
 subquestion: |
- It is a good idea to file an Answer with your motion.  See [Facing an Eviction](${ url_of('https://www.masslegalhelp.org/housing/lt1-pullout-12-evictions') })
+ It is a good idea to file an Answer with your motion.  
+ 
+ 1. Use the [Massachusetts Defense for Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview) interview to build your Answer.
+ 1. Save the file on your computer or phone.
+ 1. Come back here to finish your motion. 
+ 
+ Then you can file your Answer with this motion.
 
 yesno: counterclaim_yesno
 ---
@@ -187,10 +223,10 @@ help:
   label: | 
     What can I say?
   content: |
-    * You were living with bad conditions and you are waiting for the landlord to make needed repairs
-    * The landlord broke the terms of your agreement, or lease.
-    * The landlord is getting back at you because you reported them for something.
-    * The landlord is discriminating against you.
+    * I was living with bad conditions.
+    * I did not do what the landlord said I did.
+    * I never got a 'Notice to Quit.'
+    * I do not owe the rent the landlord claims.
         
     See [Defenses and Counterclaims](https://www.masslegalhelp.org/housing/lt1-chapter-12-legal-defenses-counterclaims)
 ---
@@ -208,35 +244,36 @@ help:
 code: |
   user.signature
 ---
-id: exit screen 1
-continue button field: exitscreen_before10
-question: |
- Your Motion to Vacate Default Judgment is done! 
-subquestion: |
-  You can download your motion on the next screen.
-  
-  The file you download includes instructions for next steps.
-    
-  **Your response is due ${ date_to_file }.**
-  
-  % if not answer_yesno:
-  If you have not yet filed an Answer. ---Gordon?  bring your Answer attached to this document.
-  % endif
+#  id: exit screen 1
+#  continue button field: exitscreen_before10
+#  question: |
+#   Your Motion to Vacate Default Judgment is done! 
+#  subquestion: |
+#    You can download your motion on the next screen.
+#    
+#    The file you download includes instructions for next steps.
+#      
+#    **Your response is due ${ date_to_file }.**
+#    
+#    % if not answer_yesno:
+#    If you have not yet filed an Answer. Use [MADE](https://www.masslegalhelp.org/housing/eviction-answer-interview) to build your answer, save it to your phone or computer and upload it on the next screen so you can it with this motion.
+#    % endif
 ---
 id: exit screen 2
-continue button field: exitscreen_after10
+continue button field: exitscreen
 question: |
- Thank you for completing this interview. 
+ Almost finished 
 subquestion: |
   You can download your motion on the next screen.
   
   The file you download includes instructions for next steps.
     
   % if not answer_yesno:
-  If you have not yet filed an Answer. ---Gordon?  bring your Answer attached to this document.
+  If you have not yet filed an Answer. Use [MADE](https://www.masslegalhelp.org/housing/eviction-answer-interview) to build your answer, save it to your phone or computer and upload it on the next screen so you can it with this motion. 
   % endif
-
+  % if date_to_file > today():
   You are filing 10 days after the default judgment which means you must ask a judge to **stay the execution** (stop the eviction) until this motion is heard.
+  % endif
 ---
 id: download
 continue button field: download
@@ -252,4 +289,4 @@ attachment:
 ---
 event: made_screen
 question: |
-  If you need help or more information regarding the filing of an answer please see more information from the Massachusetts Defense for Evictions (MADE) [here](${ url_of('https://www.gbls.org/MADE') })
+  If you need help or more information about filing an answer see [Answer to Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview).
