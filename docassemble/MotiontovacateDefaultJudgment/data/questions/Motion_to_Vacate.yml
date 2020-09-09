@@ -25,9 +25,9 @@ code: |
      removal_date
    users[0].address.address
    signature_fields = ['users[0].signature']
-   #for user_index in range( len(users) ):
-   #  one_user = 'users[' + str( user_index ) + '].signature' 
-   #  signature_fields.append( one_user )
+   for user_index in range( len(users) ):
+     one_user = 'users[' + str( user_index ) + '].signature' 
+     signature_fields.append( one_user )
    users.there_is_another = False
    basic_questions_signature_flow
    users[0].signature
