@@ -1,3 +1,13 @@
+---
+mandatory: True
+code: |
+  interview_metadata # make sure we initialize the object
+  if not defined("interview_metadata['Motion_To_Vacate_Form']"):
+    interview_metadata.initializeObject('Motion_To_Vacate_Form')
+  interview_metadata['Motion_To_Vacate_Form'].update({
+    'attachment block variable': 'motion_attachment',
+  })
+---
 include:
   - docassemble.MAVirtualCourt:basic-questions.yml
 ---
@@ -7,41 +17,46 @@ metadata:
 ---
 mandatory: True
 code: |
+  user_role = "defendant"
   basic_questions_intro_screen
   if not have_judgment:
     no_judgment
   else:
-   other_party
-   users[0].name.first
-   original_courtdate
-   reason_for_missing
-   docket_number
-   courts[0]
-   if answer_yesno:
-     stated_legaldefense
-     counterclaim_yesno = False
-   else:
-     if counterclaim_yesno:
-       stated_legaldefense
-     else:
-       stated_legaldefense = ''
-   if sheriff_notice:
-     removal_date
-   users[0].address.address
-   signature_fields = ['users[0].signature']
-   for user_index in range( len(users) ):
-     one_user = 'users[' + str( user_index ) + '].signature' 
-     signature_fields.append( one_user )
-   users.there_is_another = False
-   basic_questions_signature_flow
-   users[0].signature
-   # if date_to_file > today():
-   #   exitscreen_before10
-   # else:
-   #   exitscreen_after10
-   exitscreen
-   download
-   # made_screen
+    other_party
+    users[0].name.first
+    users[0].address.address
+    users.there_is_another = False
+    users.gathered = True
+    original_courtdate
+    reason_for_missing
+    docket_number
+    courts[0]
+  if answer_yesno:
+    stated_legaldefense
+    counterclaim_yesno = False
+  else:
+    if counterclaim_yesno:
+      stated_legaldefense
+    else:
+      stated_legaldefense = ''
+  if sheriff_notice:
+    removal_date
+  #users[0].address.address
+  form_to_sign
+  preview_screen
+  signature_fields = ['users[0].signature']
+  for user_index in range( len(users) ):
+    one_user = 'users[' + str( user_index ) + '].signature' 
+    signature_fields.append( one_user )
+  basic_questions_signature_flow
+  users[0].signature
+  # if date_to_file > today():
+  #   exitscreen_before10
+  # else:
+  #   exitscreen_after10
+  exitscreen
+  download
+  # made_screen
 ---
 code: |
   allowed_courts = [
@@ -65,8 +80,7 @@ subquestion: |
   You can ask the court to take back the decision to let the plaintiff evict you if: 
   
   * you missed the hearing for a good reason, and
-  *	you also have {a defense} for why your landlord should not evict you.
-
+  * you also have {a defense} for why your landlord should not evict you.
   We can help you file a Motion to Remove Default and Vacate Judgment.   If the court allows your motion, you start your eviction case over, from the beginning.
   
   You need your Judgment of Summary Process by Default in front of you to complete this motion. 
@@ -208,7 +222,6 @@ subquestion: |
  1. Come back here to finish your motion. 
  
  Then you can file your Answer with this motion.
-
 yesno: counterclaim_yesno
 ---
 id: legal defense
@@ -279,18 +292,76 @@ subquestion: |
   You are filing 10 days after the default judgment which means you must ask a judge to **stay the execution** (stop the eviction) until this motion is heard.
   % endif
 ---
-id: download
-continue button field: download
-question: |
-  Your forms are ready to download
-subquestion: |
-  ${ motion_attachment } 
-attachment code: motion_attachment
----
-attachment: 
-  docx template file: Motion_To_Vacate_Form.docx
-  variable name: motion_attachment
----
 event: made_screen
 question: |
   If you need help or more information about filing an answer see [Answer to Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview).
+---
+id: review before signature
+need: form_to_sign
+continue button field: preview_screen
+question: |
+  Nearly finished
+subquestion: |
+  You are almost done! Please click on the form below. It will open in a new window so you can review it and make sure it is correct.
+  
+  Don't forget to come back to this page to click to the final step of signing and sending the form to the court. 
+  
+   ${ form_to_sign }
+progress: 95
+---
+code: |
+ form_to_sign = pdf_concatenate(preview_doc)
+---
+attachment:
+  docx template file: Motion_To_Vacate_Form.docx
+  variable name: preview_doc
+---
+id: download form
+event: download
+reconsider:
+  - motion_attachment
+decoration: file-download
+question: |
+  % if not defined('email_success') or not email_success:
+  Review, download, and send form
+  % else:
+  Form delivered
+  % endif
+subquestion: |
+  % if not defined('email_success') or not email_success:
+  Thank you ${users[0]}. Your form is ready to send to the court. 
+  
+  **It is not delivered until you complete the delivery process below.**
+  1. Click the preview image below to open the form in a new window.
+  2. Download and save or print a copy of this form for your 
+  records.
+  3. Click the "Submit to ${courts[0]}" button to send it to the court. 
+  4. You will have a chance to add instructions to the clerk and see the cover page before final delivery.
+  % else:
+  If you do not hear from the court in 1 business day, call the Trial Court's Emergency HelpLine 833-91-COURT (833-912-6878).
+  
+  The Emergency HelpLine is open:  
+  8:30am - 4:30pm,   
+  Monday - Friday.
+  % endif
+  
+  ${ form_to_file_no_cover }  
+  
+  % if not defined('email_success') or not email_success:
+    ${ action_button_html( url_action('form_delivery_complete'), id_tag="submitToCourt", label="Submit to " + str(courts[0].name), icon=send_icon, size="md", color="primary")}
+    
+  Or download/email below:
+  % else:
+    Your email has already been delivered to ${courts[0]}
+    
+  [:file-download: Download with cover page](${final_form_to_file.url_for()})    
+  % endif
+progress: 100
+attachment code: motion_attachment
+section: download
+---
+attachment:
+  - name: Motion to Vacate Housing
+    variable name: motion_attachment
+    filename: Motion_To_Vacate_Form
+    docx template file: Motion_To_Vacate_Form.docx
