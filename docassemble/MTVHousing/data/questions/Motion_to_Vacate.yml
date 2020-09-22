@@ -60,7 +60,7 @@ question: |
 subquestion: |
  If you got a Judgment of Summary Process by Default, it means you missed an eviction hearing and {the plaintiff} won their case to evict you.
  
-  [${intro_image.show(width='35em')}](${intro_image.url_for()})
+ [FILE default_order.png, 100%, default judgment]
  
   You can ask the court to take back the decision to let the plaintiff evict you if: 
   
@@ -99,7 +99,7 @@ question: |
 subquestion: |
   ${users[0].familiar()}, look at the judgment you got:
   
-  [${default_date_image.show(width='35em')}](${default_date_image.url_for()})
+  [FILE default_order_date.png, 100%, default judgment with date top center circled]
 fields:
  - Date Judgment Entered: original_courtdate
    datatype: date
@@ -107,32 +107,15 @@ fields:
 code: |
  date_to_file = original_courtdate.plus(days=11)
 ---
-objects:
-  - default_plaintiff_image: DAStaticFile.using(filename='default_order_plaintiff.png', alt_text='Plaintiff Name')
-  - default_docket_number_image: DAStaticFile.using(filename='default_order_docket.png', alt_text='Docket Number')
-  - intro_image: DAStaticFile.using(filename='default_order.png', alt_text='Default Order Notice')
-  - default_date_image: DAStaticFile.using(filename='default_date.png', alt_text='Default Date')
----
 id: other party info
 question: |
   What is the plaintiff's name in your case?
 subquestion: |
   Look at your default judgment. 
   
-  [${default_plaintiff_image.show(width='35em')}](${default_plaintiff_image.url_for()})
-
+  [FILE default_order_plaintiff.png, 100%, default judgment plaintiff box circled]
 fields:
   - Plaintiff(s) who are parties to this Judgment: other_party
----
-id: docket number
-question: |
- What is the docket number for your case?
-subquestion: |
-  Look at your default judgment. The docket number is located at the top and center of the notice. 
-  
-  [${default_docket_number_image.show(width='35em')}](${default_docket_number_image.url_for()})
-fields: 
- - Docket Number: docket_number
 ---
 id: removal notice
 question: |
@@ -164,16 +147,35 @@ question: |
  Why did you miss your hearing?
 fields: 
   - no label: reason_for_missing
-    datatype: checkboxes
+    input type: radio
     choices:
       - I never got a notice about the court date: I never recieved notice of the court date.
       - My landlord told me I did not need to go to court.: My landlord told me I did not need to go to court.
       - I was late and my case had already been called.: I was late and my case had already been called.
       - I did not make it to court because someone in my household was sick or died: I didnt make it to court because someone in my household was sick or died.
-      - I did not recieve notice of the Zoom hearing: I did not recieve notice of the Zoom hearing. 
-      - I was unable to make it onto Zoom for the hearing: I was unable to make it onto Zoom for the hearing.
       - Other: Other.
-  - "Other": elaborate
+  - Other: elaborate
+    datatype: area
+    show if: 
+      variable: reason_for_missing 
+      is: Other.
+---
+id: docket number
+question: |
+ What is the docket number for your case?
+subquestion: |
+  Look at your default judgment. 
+  
+  [FILE default_order_docket.png, 100%, default judgment docket number circled.]
+fields: 
+ - Docket Number: docket_number
+help:
+  label: |
+    Where can I find my docket number?
+  content: |
+    The docket number is at the top and center of the page.
+    
+    [FILE default_order_docket.png, 100%]
 ---
 id: previous answer filed
 question: |
@@ -206,8 +208,13 @@ subquestion: |
  1. Come back here to finish your motion. 
  
  Then you can file your Answer with this motion.
-
 yesno: counterclaim_yesno
+---
+question: |
+  Upload your answer on this screen
+fields: 
+  - Upload your answer in a PDF/Photo: user_answer
+    datatype: file
 ---
 id: legal defense
 question: |
@@ -282,12 +289,18 @@ continue button field: download
 question: |
   Your forms are ready to download
 subquestion: |
-  ${ motion_attachment } 
+  ${ combined_motion } 
 attachment code: motion_attachment
 ---
 attachment: 
   docx template file: Motion_To_Vacate_Form.docx
   variable name: motion_attachment
+---
+code: |
+  if (not answer_yesno) and counterclaim_yesno: 
+    combined_motion = pdf_concatenate(motion_attachment, user_answer, filename="motion_to_vacate_default.pdf")
+  else:
+    combined_motion = motion_attachment
 ---
 event: made_screen
 question: |
