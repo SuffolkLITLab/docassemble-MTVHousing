@@ -19,9 +19,9 @@ code: |
    courts[0]
    if answer_yesno:
      stated_legaldefense
-     counterclaim_yesno = False
+     answer_help = False
    else:
-     if counterclaim_yesno:
+     if answer_help:
        stated_legaldefense
      else:
        stated_legaldefense = ''
@@ -207,7 +207,13 @@ subquestion: |
  
  Then you can file your Answer with this motion.
 
-yesno: counterclaim_yesno
+yesno: answer_help
+---
+question: |
+  Upload your answer on this screen
+fields: 
+  - Upload your answer in a PDF/Photo: user_answer
+    datatype: file
 ---
 id: legal defense
 question: |
@@ -282,12 +288,18 @@ continue button field: download
 question: |
   Your forms are ready to download
 subquestion: |
-  ${ motion_attachment } 
+  ${ combined_motion } 
 attachment code: motion_attachment
 ---
 attachment: 
   docx template file: Motion_To_Vacate_Form.docx
   variable name: motion_attachment
+---
+code: |
+  if (not answer_yesno) and answer_help: 
+    combined_motion = pdf_concatenate(motion_attachment, user_answer, filename="motion_to_vacate_default.pdf")
+  else:
+    combined_motion = motion_attachment
 ---
 event: made_screen
 question: |
