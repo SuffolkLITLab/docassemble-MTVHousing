@@ -19,9 +19,9 @@ code: |
    courts[0]
    if answer_yesno:
      stated_legaldefense
-     answer_help = False
+     counterclaim_yesno = False
    else:
-     if answer_help:
+     if counterclaim_yesno:
        stated_legaldefense
      else:
        stated_legaldefense = ''
@@ -60,12 +60,13 @@ question: |
 subquestion: |
  If you got a Judgment of Summary Process by Default, it means you missed an eviction hearing and {the plaintiff} won their case to evict you.
  
- [FILE default_order.png, 100%, default judgment]
+  [${intro_image.show(width='35em')}](${intro_image.url_for()})
  
   You can ask the court to take back the decision to let the plaintiff evict you if: 
   
   * you missed the hearing for a good reason, and
-  * you also have {a defense} for why your landlord should not evict you.
+  *	you also have {a defense} for why your landlord should not evict you.
+
   We can help you file a Motion to Remove Default and Vacate Judgment.   If the court allows your motion, you start your eviction case over, from the beginning.
   
   You need your Judgment of Summary Process by Default in front of you to complete this motion. 
@@ -98,7 +99,7 @@ question: |
 subquestion: |
   ${users[0].familiar()}, look at the judgment you got:
   
-  [FILE default_order_date.png, 100%, default judgment with date top center circled]
+  [${default_date_image.show(width='35em')}](${default_date_image.url_for()})
 fields:
  - Date Judgment Entered: original_courtdate
    datatype: date
@@ -106,15 +107,32 @@ fields:
 code: |
  date_to_file = original_courtdate.plus(days=11)
 ---
+objects:
+  - default_plaintiff_image: DAStaticFile.using(filename='default_order_plaintiff.png', alt_text='Plaintiff Name')
+  - default_docket_number_image: DAStaticFile.using(filename='default_order_docket.png', alt_text='Docket Number')
+  - intro_image: DAStaticFile.using(filename='default_order.png', alt_text='Default Order Notice')
+  - default_date_image: DAStaticFile.using(filename='default_date.png', alt_text='Default Date')
+---
 id: other party info
 question: |
   What is the plaintiff's name in your case?
 subquestion: |
   Look at your default judgment. 
   
-  [FILE default_order_plaintiff.png, 100%, default judgment plaintiff box circled]
+  [${default_plaintiff_image.show(width='35em')}](${default_plaintiff_image.url_for()})
+
 fields:
   - Plaintiff(s) who are parties to this Judgment: other_party
+---
+id: docket number
+question: |
+ What is the docket number for your case?
+subquestion: |
+  Look at your default judgment. The docket number is located at the top and center of the notice. 
+  
+  [${default_docket_number_image.show(width='35em')}](${default_docket_number_image.url_for()})
+fields: 
+ - Docket Number: docket_number
 ---
 id: removal notice
 question: |
@@ -152,20 +170,10 @@ fields:
       - My landlord told me I did not need to go to court.: My landlord told me I did not need to go to court.
       - I was late and my case had already been called.: I was late and my case had already been called.
       - I did not make it to court because someone in my household was sick or died: I didnt make it to court because someone in my household was sick or died.
-      - I did not recieve notice of the Zoom hearing: I did not receieve notice of the Zoom hearing.
-      - I was unable to get on Zoom for the hearing: I was unable to get on Zoom for the hearing. 
+      - I did not recieve notice of the Zoom hearing: I did not recieve notice of the Zoom hearing. 
+      - I was unable to make it onto Zoom for the hearing: I was unable to make it onto Zoom for the hearing.
       - Other: Other.
   - "Other": elaborate
----
-id: docket number
-question: |
- What is the docket number for your case?
-subquestion: |
-  Look at your default judgment. The docket number can be found on the top and center.
-  
-  [FILE default_order_docket.png, 100%, default judgment docket number circled.]
-fields: 
- - Docket Number: docket_number
 ---
 id: previous answer filed
 question: |
@@ -191,15 +199,15 @@ id: filing a future answer
 question: |
  Are you planning to file an Answer?
 subquestion: |
- It is strongly encouraged that you file an answer stating your opposition to your landlords claims along with submitting this motion to the court.  
+ It is a good idea to file an Answer with your motion.  
  
- 1. Use the [Massachusetts Defense for Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview) interview to build your Answer. 
-     - **This will take about 40 minutes**
- 2. Save the file on your computer or phone.
- 3. Come back here to finish your motion. 
+ 1. Use the [Massachusetts Defense for Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview) interview to build your Answer.
+ 1. Save the file on your computer or phone.
+ 1. Come back here to finish your motion. 
  
  Then you can file your Answer with this motion.
-yesno: answer_help
+
+yesno: counterclaim_yesno
 ---
 id: legal defense
 question: |
