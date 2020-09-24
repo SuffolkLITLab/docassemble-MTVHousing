@@ -42,7 +42,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
                 out.setdefault(package, []).append(prefix+name)
     return out
 
-setup(name='docassemble.MotiontovacateDefaultJudgment',
+setup(name='docassemble.MTVHousing',
       version='0.0.2',
       description=('A docassemble extension.'),
       long_description='# docassemble.MotiontovacateDefaultJudgment\r\n\r\nA docassemble extension.\r\n\r\n## Author\r\n\r\nMichael Cronin, mcronin@su.suffolk.edu\r\n\r\n',
@@ -55,6 +55,6 @@ setup(name='docassemble.MotiontovacateDefaultJudgment',
       namespace_packages=['docassemble'],
       install_requires=[],
       zip_safe=False,
-      package_data=find_package_data(where='docassemble/MotiontovacateDefaultJudgment/', package='docassemble.MotiontovacateDefaultJudgment'),
+      package_data=find_package_data(where='docassemble/MTVHousing/', package='docassemble.MTVHousing'),
      )
 
