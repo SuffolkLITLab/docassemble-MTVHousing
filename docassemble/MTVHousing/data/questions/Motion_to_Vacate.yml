@@ -11,8 +11,8 @@ code: |
 include:
   - docassemble.MAVirtualCourt:basic-questions.yml
 ---
-code: |
-  download_titles = ["Motion to Vacate Default"]
+ code: |
+   download_titles = ["Motion to Vacate Default"]
 ---
 metadata:
   title: |
@@ -24,16 +24,17 @@ code: |
   basic_questions_intro_screen
   if not have_judgment:
     no_judgment
-  else:
-    other_party
-    users[0].name.first
-    #users[0].address.address
-    #users.there_is_another = False
-    #users.gathered = True
-    original_courtdate
-    reason_for_missing
-    docket_number
-    courts[0]
+  users[0].name.first
+  users[0].address.address
+  users[0].mobile_number
+  users.there_is_another = False
+  users.gathered = True
+  user_needs_interpreter
+  other_party
+  docket_number
+  courts[0]
+  original_courtdate
+  reason_for_missing
   if answer_yesno:
     stated_legaldefense
     counterclaim_yesno = False
@@ -44,7 +45,6 @@ code: |
       stated_legaldefense = ''
   if sheriff_notice:
     removal_date
-  users[0].address.address
   form_to_sign
   preview_screen
   signature_fields = ['users[0].signature']
