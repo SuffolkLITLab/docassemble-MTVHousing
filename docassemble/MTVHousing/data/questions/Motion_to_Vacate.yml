@@ -164,16 +164,18 @@ question: |
  Why did you miss your hearing?
 fields: 
   - no label: reason_for_missing
-    datatype: checkboxes
+    input type: radio
     choices:
-      - I never got a notice about the court date: I never recieved notice of the court date.
+      - I never got a notice about the court date.: I never recieved notice of the court date.
       - My landlord told me I did not need to go to court.: My landlord told me I did not need to go to court.
       - I was late and my case had already been called.: I was late and my case had already been called.
-      - I did not make it to court because someone in my household was sick or died: I didnt make it to court because someone in my household was sick or died.
-      - I did not recieve notice of the Zoom hearing: I did not recieve notice of the Zoom hearing. 
-      - I was unable to make it onto Zoom for the hearing: I was unable to make it onto Zoom for the hearing.
-      - Other: Other.
-  - "Other": elaborate
+      - I did not make it to court because someone in my household was sick or died.: I didnt make it to court because someone in my household was sick or died.
+      - I did not recieve notice of the Zoom hearing.: I did not recieve notice of the Zoom hearing.
+      - I was unable to make it onto Zoom for the hearing.: I was unable to make it onto Zoom for the hearing.
+      - Other: Other
+  - Other: other_reason_for_missing
+    js show if: |
+      val('reason_for_missing') == "Other"
 ---
 id: previous answer filed
 question: |
