@@ -1,5 +1,18 @@
+---
+mandatory: True
+code: |
+  interview_metadata # make sure we initialize the object
+  if not defined("interview_metadata['Motion_To_Vacate_Form']"):
+    interview_metadata.initializeObject('Motion_To_Vacate_Form')
+  interview_metadata['Motion_To_Vacate_Form'].update({
+    'attachment block variable': 'motion_attachment',
+  })
+---
 include:
   - docassemble.MAVirtualCourt:basic-questions.yml
+---
+code: |
+  download_titles = ["Motion to Vacate Default"]
 ---
 metadata:
   title: |
@@ -7,41 +20,47 @@ metadata:
 ---
 mandatory: True
 code: |
+	user_role = "defendant"
   basic_questions_intro_screen
   if not have_judgment:
     no_judgment
+  users[0].name.first
+  users[0].address.address
+  users[0].mobile_number
+  users.there_is_another = False
+  users.gathered = True
+  user_needs_interpreter
+  other_party
+  docket_number
+  courts[0]
+  original_courtdate
+  reason_for_missing
+  docket_number
+  courts[0]
+  if answer_yesno:
+    stated_legaldefense
+    answer_help = False
   else:
-   other_party
-   users[0].name.first
-   original_courtdate
-   reason_for_missing
-   docket_number
-   courts[0]
-   if answer_yesno:
-     stated_legaldefense
-     answer_help = False
-   else:
-     if answer_help:
-       stated_legaldefense
-     else:
-       stated_legaldefense = ''
-   if sheriff_notice:
-     removal_date
-   users[0].address.address
-   signature_fields = ['users[0].signature']
-   for user_index in range( len(users) ):
-     one_user = 'users[' + str( user_index ) + '].signature' 
-     signature_fields.append( one_user )
-   users.there_is_another = False
-   basic_questions_signature_flow
-   users[0].signature
-   # if date_to_file > today():
-   #   exitscreen_before10
-   # else:
-   #   exitscreen_after10
-   exitscreen
-   download
-   # made_screen
+    if answer_help:
+      stated_legaldefense
+    else:
+      stated_legaldefense = ''
+  if sheriff_notice:
+    removal_date
+  signature_fields = ['users[0].signature']
+  for user_index in range( len(users) ):
+    one_user = 'users[' + str( user_index ) + '].signature' 
+    signature_fields.append( one_user )
+  users.there_is_another = False
+  basic_questions_signature_flow
+  users[0].signature
+  # if date_to_file > today():
+  #   exitscreen_before10
+  # else:
+  #   exitscreen_after10
+  exitscreen
+  download
+  # made_screen
 ---
 code: |
   allowed_courts = [
@@ -164,7 +183,7 @@ question: |
  Why did you miss your hearing?
 fields: 
   - no label: reason_for_missing
-    input type: radio
+    datatype: checkboxes
     choices:
       - I never got a notice about the court date.: I never recieved notice of the court date.
       - My landlord told me I did not need to go to court.: My landlord told me I did not need to go to court.
@@ -173,9 +192,9 @@ fields:
       - I did not recieve notice of the Zoom hearing.: I did not recieve notice of the Zoom hearing.
       - I was unable to make it onto Zoom for the hearing.: I was unable to make it onto Zoom for the hearing.
       - Other: Other
+    none of the above: False
   - Other: other_reason_for_missing
-    js show if: |
-      val('reason_for_missing') == "Other"
+    show if: reason_for_missing["Other"]
 ---
 id: previous answer filed
 question: |
@@ -293,9 +312,73 @@ subquestion: |
   ${ combined_motion } 
 attachment code: motion_attachment
 ---
-attachment: 
+event: made_screen
+question: |
+  If you need help or more information about filing an answer see [Answer to Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview).
+---
+id: review before signature
+need: form_to_sign
+continue button field: preview_screen
+question: |
+  Nearly finished
+subquestion: |
+  You are almost done! Please click on the form below. It will open in a new window so you can review it and make sure it is correct.
+  
+  Don't forget to come back to this page to click to the final step of signing and sending the form to the court. 
+  
+   ${ form_to_sign }
+progress: 95
+---
+id: download form
+event: download
+reconsider:
+  - motion_attachment
+decoration: file-download
+question: |
+  % if not defined('email_success') or not email_success:
+  Review, download, and send form
+  % else:
+  Form delivered
+  % endif
+subquestion: |
+  % if not defined('email_success') or not email_success:
+  Thank you ${users[0]}. Your form is ready to send to the court. 
+  
+  **It is not delivered until you complete the delivery process below.**
+  1. Click the preview image below to open the form in a new window.
+  2. Download and save or print a copy of this form for your 
+  records.
+  3. Click the "Submit to ${courts[0]}" button to send it to the court. 
+  4. You will have a chance to add instructions to the clerk and see the cover page before final delivery.
+  % else:
+  If you do not hear from the court in 1 business day, call the Trial Court's Emergency HelpLine 833-91-COURT (833-912-6878).
+  
+  The Emergency HelpLine is open:  
+  8:30am - 4:30pm,   
+  Monday - Friday.
+  % endif
+  
+  ${ form_to_file_no_cover }  
+  
+  % if not defined('email_success') or not email_success:
+    ${ action_button_html( url_action('form_delivery_complete'), id_tag="submitToCourt", label="Submit to " + str(courts[0].name), icon=send_icon, size="md", color="primary")}
+    
+  Or download/email below:
+  % else:
+    Your email has already been delivered to ${courts[0]}
+    
+  [:file-download: Download with cover page](${final_form_to_file.url_for()})    
+  % endif
+progress: 100
+attachment code: motion_attachment
+section: download
+---
+code: |
+ form_to_sign = pdf_concatenate(preview_doc)
+---
+attachment:
   docx template file: Motion_To_Vacate_Form.docx
-  variable name: motion_attachment
+  variable name: preview_doc
 ---
 code: |
   if (not answer_yesno) and answer_help: 
@@ -303,6 +386,8 @@ code: |
   else:
     combined_motion = motion_attachment
 ---
-event: made_screen
-question: |
-  If you need help or more information about filing an answer see [Answer to Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview).
+attachment:
+  - name: Motion to Vacate Housing
+    variable name: motion_attachment
+    filename: Motion_To_Vacate_Form
+    docx template file: Motion_To_Vacate_Form.docx
