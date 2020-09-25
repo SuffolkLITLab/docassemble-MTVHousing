@@ -38,10 +38,12 @@ code: |
   docket_number
   courts[0]
   if answer_yesno:
+    user_answer
     stated_legaldefense
     answer_help = False
   else:
     if answer_help:
+      user_answer
       stated_legaldefense
     else:
       stated_legaldefense = ''
@@ -220,14 +222,15 @@ id: filing a future answer
 question: |
  Are you planning to file an Answer?
 subquestion: |
- It is a good idea to file an Answer with your motion.  
+ **It is strongly encouraged that you file an answer if you have not done so. This motion will be even more effective is you have a reason as to why you should not be evicted. **
  
  1. Use the [Massachusetts Defense for Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview) interview to build your Answer.
- 1. Save the file on your computer or phone.
- 1. Come back here to finish your motion. 
+ 2. Save the file on your computer or phone.
+ 3. Come back here to upload you answer finish your motion.
  
- Then you can file your Answer with this motion.
-
+ Tap **Yes** to upload your Answer on the next screen.
+ 
+ Tap **No** if you do not plan to create an answer and you understand that by doing so you will limit the effectiveness of this motion.
 yesno: answer_help
 ---
 question: |
