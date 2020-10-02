@@ -132,7 +132,7 @@ objects:
   - default_plaintiff_image: DAStaticFile.using(filename='default_order_plaintiff.png', alt_text='Plaintiff Name')
   - default_docket_number_image: DAStaticFile.using(filename='default_order_docket.png', alt_text='Docket Number')
   - intro_image: DAStaticFile.using(filename='default_order.png', alt_text='Default Order Notice')
-  - default_date_image: DAStaticFile.using(filename='default_date.png', alt_text='Default Date')
+  - default_date_image: DAStaticFile.using(filename='default_order_date.png', alt_text='Default Date')
 ---
 id: other party info
 question: |
