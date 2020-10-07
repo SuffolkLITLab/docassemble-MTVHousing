@@ -193,10 +193,12 @@ fields:
       - I did not make it to court because someone in my household was sick or died.: I didnt make it to court because someone in my household was sick or died.
       - I did not recieve notice of the Zoom hearing.: I did not recieve notice of the Zoom hearing.
       - I was unable to make it onto Zoom for the hearing.: I was unable to make it onto Zoom for the hearing.
-      - Other: Other.
     none of the above: False
+    required: False
+  - Other: has_other_reason
+    datatype: yesnowide
   - Other: other_reason_for_missing
-    show if: reason_for_missing["Other."]
+    show if: has_other_reason
 ---
 id: previous answer filed
 question: |
