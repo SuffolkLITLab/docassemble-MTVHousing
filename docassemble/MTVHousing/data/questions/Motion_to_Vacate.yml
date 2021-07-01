@@ -9,7 +9,11 @@ code: |
   })
 ---
 include:
-  - docassemble.MAVirtualCourt:basic-questions.yml
+  - docassemble.AssemblyLine:al_package.yml
+  - docassemble.MassAccess:massaccess.yml
+---
+objects: 
+  - answer_attachment: ALDocument.using(title='Answer', filename='user_answer', has_addendum=False)
 ---
 code: |
   download_titles = ["Motion to Vacate Default"]
@@ -32,11 +36,10 @@ code: |
   user_needs_interpreter
   other_party
   docket_number
-  courts[0]
+  trial_court
   original_courtdate
   reason_for_missing
   docket_number
-  courts[0]
   if answer_yesno:
     user_answer
     stated_legaldefense
@@ -193,12 +196,14 @@ fields:
       - I did not make it to court because someone in my household was sick or died.: I did not make it to court because someone in my household was sick or died.
       - I did not recieve notice of the Zoom hearing.: I did not recieve notice of the Zoom hearing.
       - I was unable to make it onto Zoom for the hearing.: I was unable to make it onto Zoom for the hearing.
-    none of the above: False
-    required: False
+    none of the above: false
   - Other: has_other_reason
     datatype: yesnowide
   - Other: other_reason_for_missing
     show if: has_other_reason
+validation code: | 
+  if not has_other_reason and len(reason_for_missing.true_values()) <=0:
+    validation_error("WRONG")
 ---
 id: previous answer filed
 question: |
@@ -235,6 +240,7 @@ subquestion: |
  Tap **No** if you do not plan to create an answer and you understand that by doing so you will limit the effectiveness of this motion.
 yesno: answer_help
 ---
+id: answer upload
 question: |
   Upload your answer on this screen
 fields: 
@@ -313,16 +319,16 @@ id: download
 continue button field: download
 question: |
   Your forms are ready to download
-subquestion: |
-  ${ combined_motion } 
-attachment code: motion_attachment
+subquestion: |  
+  ${ al_user_bundle.download_list_html( key='final' ) }
+  
+  ${ al_user_bundle.send_button_html( key='final' ) }
 ---
 event: made_screen
 question: |
   If you need help or more information about filing an answer see [Answer to Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview).
 ---
 id: review before signature
-need: form_to_sign
 continue button field: preview_screen
 question: |
   Nearly finished
@@ -330,8 +336,9 @@ subquestion: |
   You are almost done! Please click on the form below. It will open in a new window so you can review it and make sure it is correct.
   
   Don't forget to come back to this page to click to the final step of signing and sending the form to the court. 
+
+  ${ al_user_bundle.as_pdf( key='preview' ) }
   
-   ${ form_to_sign }
 progress: 95
 ---
 id: download form
@@ -353,7 +360,7 @@ subquestion: |
   1. Click the preview image below to open the form in a new window.
   2. Download and save or print a copy of this form for your 
   records.
-  3. Click the "Submit to ${courts[0]}" button to send it to the court. 
+  3. Click the "Submit to ${trial_court}" button to send it to the court. 
   4. You will have a chance to add instructions to the clerk and see the cover page before final delivery.
   % else:
   If you do not hear from the court in 1 business day, call the Trial Court's Emergency HelpLine 833-91-COURT (833-912-6878).
@@ -363,36 +370,52 @@ subquestion: |
   Monday - Friday.
   % endif
   
-  ${ form_to_file_no_cover }  
+  ${ al_user_bundle.download_list_html( key='final' ) }
+  
   
   % if not defined('email_success') or not email_success:
-    ${ action_button_html( url_action('form_delivery_complete'), id_tag="submitToCourt", label="Submit to " + str(courts[0].name), icon=send_icon, size="md", color="primary")}
+    ${ action_button_html( url_action('form_delivery_complete'), id_tag="submitToCourt", label="Submit to " + str(trial_court), icon=send_icon, size="md", color="primary")}
     
   Or download/email below:
   % else:
-    Your email has already been delivered to ${courts[0]}
+    Your email has already been delivered to ${trial_court}
     
-  [:file-download: Download with cover page](${final_form_to_file.url_for()})    
+  [:file-download: Download with cover page]  ## NEED TO DO   
   % endif
 progress: 100
-attachment code: motion_attachment
 section: download
 ---
-code: |
- form_to_sign = pdf_concatenate(preview_doc)
+#code: |
+ # = pdf_concatenate(preview_doc)
 ---
-attachment:
-  docx template file: Motion_To_Vacate_Form.docx
-  variable name: preview_doc
+#attachment:
+# docx template file: Motion_To_Vacate_Form.docx
+# variable name: preview_doc
+---
+#code: |
+#  if (not answer_yesno) and answer_help: 
+#    combined_motion = pdf_concatenate(motion_attachment, user_answer, #filename="motion_to_vacate_default.pdf")
+#  else:
+#    combined_motion = motion_attachment
+---
+code: | 
+  answer_attachment[i] = pdf_concatenate(user_answer)
 ---
 code: |
-  if (not answer_yesno) and answer_help: 
-    combined_motion = pdf_concatenate(motion_attachment, user_answer, filename="motion_to_vacate_default.pdf")
+  if answer_yesno or answer_help: 
+    answer_attachment.enabled = True
   else:
-    combined_motion = motion_attachment
+    answer_attachment.enabled = False
 ---
 attachment:
-  - name: Motion to Vacate Housing
-    variable name: motion_attachment
-    filename: Motion_To_Vacate_Form
+    variable name: motion_attachment[i]
     docx template file: Motion_To_Vacate_Form.docx
+--- 
+objects: 
+  - al_court_bundle: ALDocumentBundle.using(enabled=True, elements=[motion_attachment, answer_attachment], filename="Motion_To_Vacate_Form.pdf", title="Motion to Vacate Housing send to the court")
+  - al_user_bundle: ALDocumentBundle.using(elements=[motion_attachment, answer_attachment], filename="Motion_To_Vacate_Form.pdf", title="Form to download")
+---
+objects: 
+  - motion_attachment: ALDocument.using( enabled=True, has_addendum=False, title='Motion to Vacate Housing', filename='Motion_To_Vacate_Form.pdf' )
+  
+  
