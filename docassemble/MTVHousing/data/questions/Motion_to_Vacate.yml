@@ -22,10 +22,12 @@ metadata:
   title: |
     Motion to Vacate Default (Housing)
 ---
+id: order block
 mandatory: True
 code: |
 	user_role = "defendant"
   basic_questions_intro_screen
+  remove_default_intro
   if not have_judgment:
     no_judgment
   users[0].name.first
@@ -40,18 +42,18 @@ code: |
   original_courtdate
   reason_for_missing
   docket_number
+  if sheriff_notice:
+    removal_date
   if answer_yesno:
     user_answer
-    stated_legaldefense
     answer_help = False
   else:
     if answer_help:
       user_answer
-      stated_legaldefense
-    else:
-      stated_legaldefense = ''
-  if sheriff_notice:
-    removal_date
+  stated_legaldefense
+  preview_screen
+  service_choice
+  service_date
   signature_fields = ['users[0].signature']
   for user_index in range( len(users) ):
     one_user = 'users[' + str( user_index ) + '].signature' 
@@ -92,17 +94,20 @@ subquestion: |
   *	you also have {a defense} for why your landlord should not evict you.
 
   We can help you file a Motion to Remove Default and Vacate Judgment.   If the court allows your motion, you start your eviction case over, from the beginning.
-  
-  You need your Judgment of Summary Process by Default in front of you to complete this motion. 
- 
- Do you have your Judgment in front of you?
-yesno: have_judgment 
-# continue button field: remove_default_intro
+
+continue button field: remove_default_intro
 terms: 
   the plaintiff: |
     The plaintiff is the person or business who is trying to evict you.
   a defense: |
     Defenses are the [legal reasons](https://www.masslegalhelp.org/housing/lt1-chapter-12-legal-defenses-counterclaims#defensesprevent) why you should not be evicted.
+---
+id: confirm has judgement
+question: | 
+  Do you have your Judgment in front of you?
+subquestion: | 
+  You need your Judgment of Summary Process by Default in front of you to complete this motion. 
+yesno: have_judgment 
 ---
 id: kickout no judgment
 event: no_judgment
@@ -203,7 +208,7 @@ fields:
     show if: has_other_reason
 validation code: | 
   if not has_other_reason and len(reason_for_missing.true_values()) <=0:
-    validation_error("WRONG")
+    validation_error('You must provide at least one reason for missing your hearing. If you do not see your reason listed select "Other" and write your own answer.')
 ---
 id: previous answer filed
 question: |
@@ -270,6 +275,34 @@ help:
         
     See [Defenses and Counterclaims](https://www.masslegalhelp.org/housing/lt1-chapter-12-legal-defenses-counterclaims)
 ---
+id: service 
+question: |
+  How will you deliver the required copies of the motion and supporting materials to the ${ other_party } or their attorney(s)?
+subquestion: |
+  Select the method of delivery that you have used or will use to provide the required copies of the motion. 
+  
+  If the other party(s) do not have an attorney, you are required to serve a copy on the self-represented party.
+field: service_choice
+choices: 
+  - Deliver by hand: delivered 
+  - Deliver by mail: mailed
+  - "I don't know how I will deliver this motion": idk_service_method
+---
+id: service date
+question: | 
+  When will you deliver this motion to the ${ other_party } 
+fields:
+  - "I don't know when I will deliver this motion": idk_service_date
+    datatype: yesno
+  - Date: service_date
+    datatype: date
+    default: ${today().format("yyyy-MM-dd")}
+    hide if: idk_service_date
+validation code: |
+  # This should be safe to 
+  if idk_service_date:
+    service_date = ''  
+---
 #id: new court date
 #question: |
 #  When would you like to schedule this motion?
@@ -331,20 +364,22 @@ question: |
 id: review before signature
 continue button field: preview_screen
 question: |
-  Nearly finished
+  Preview your form before you sign it
 subquestion: |
-  You are almost done! Please click on the form below. It will open in a new window so you can review it and make sure it is correct.
+  Here is a preview of the form you will sign on the next page.  
   
   Don't forget to come back to this page to click to the final step of signing and sending the form to the court. 
 
   ${ al_user_bundle.as_pdf( key='preview' ) }
+
+  Click the image to open it in a new tab.
+  
+  Remember to come back to this window to continue and sign your form.
   
 progress: 95
 ---
 id: download form
 event: download
-reconsider:
-  - motion_attachment
 decoration: file-download
 question: |
   % if not defined('email_success') or not email_success:
@@ -380,7 +415,8 @@ subquestion: |
   % else:
     Your email has already been delivered to ${trial_court}
     
-  [:file-download: Download with cover page]  ## NEED TO DO   
+    
+  [:file-download: Download with cover page](${ al_court_bundle.url_for()})  
   % endif
 progress: 100
 section: download
@@ -408,14 +444,19 @@ code: |
     answer_attachment.enabled = False
 ---
 attachment:
-    variable name: motion_attachment[i]
+  - variable name: motion_attachment[i]
     docx template file: Motion_To_Vacate_Form.docx
+  - name: Post interview instructions
+    filename: Post-interview-instructions     
+    variable name: post_interview_instructions[i]        
+    docx template file: next_steps_motion_to_vacate.docx
 --- 
 objects: 
   - al_court_bundle: ALDocumentBundle.using(enabled=True, elements=[motion_attachment, answer_attachment], filename="Motion_To_Vacate_Form.pdf", title="Motion to Vacate Housing send to the court")
   - al_user_bundle: ALDocumentBundle.using(elements=[motion_attachment, answer_attachment], filename="Motion_To_Vacate_Form.pdf", title="Form to download")
 ---
 objects: 
-  - motion_attachment: ALDocument.using( enabled=True, has_addendum=False, title='Motion to Vacate Housing', filename='Motion_To_Vacate_Form.pdf' )
+  - motion_attachment: ALDocument.using( enabled=True, has_addendum=False, title='Motion to Remove Default and Vacate Judgement', filename='Motion_To_Vacate_Form.pdf' )
+  - post_interview_instructions: ALDocument.using(title="Instructions", filename="next_steps_motion_to_vacate.docx", enabled=True, has_addendum=False)
   
   
