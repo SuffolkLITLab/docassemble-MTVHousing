@@ -35,7 +35,7 @@ code: |
   users[0].mobile_number
   users.there_is_another = False
   users.gathered = True
-  user_needs_interpreter
+  #user_needs_interpreter
   other_party
   docket_number
   trial_court
@@ -65,7 +65,7 @@ code: |
   #   exitscreen_before10
   # else:
   #   exitscreen_after10
-  exitscreen
+  #exitscreen
   download
   # made_screen
 ---
@@ -126,7 +126,7 @@ id: original date
 question: |
  What is the date of the Default Judgment?
 subquestion: |
-  ${users[0].familiar()}, look at the judgment you got:
+  ${users[0].familiar()}, look at the judgment you got. Look for the line that tells you the Date the judgement was entered.
   
   [${default_date_image.show(width='35em')}](${default_date_image.url_for()})
 fields:
@@ -171,7 +171,7 @@ subquestion: |
   
   If you got one of these notices, you can ask the judge to give you more time before the sheriff or constable moves you out. This is called asking for a "stay of execution."
   
-  Did you get a notice of removal from a sheriff or constable?
+  **Did you get a notice of removal from a sheriff or constable?**
   
 yesno: sheriff_notice
 ---
@@ -232,18 +232,26 @@ terms:
 --- 
 id: filing a future answer
 question: |
- Are you planning to file an Answer?
+  It is strongly encouraged that you file an {Answer}
 subquestion: |
- **It is strongly encouraged that you file an answer if you have not done so. This motion will be even more effective is you have a reason as to why you should not be evicted. **
+  This motion will be even more effective if you write an {Answer} tell the court why you should not be evicted.
+  
+  **How to file an answer:**
+
+  1. Use the [Massachusetts Defense for Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview) interview to build your Answer.
+  2. Save the file on your computer or phone.
+  3. Come back here to upload you answer finish your motion.
  
- 1. Use the [Massachusetts Defense for Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview) interview to build your Answer.
- 2. Save the file on your computer or phone.
- 3. Come back here to upload you answer finish your motion.
- 
- Tap **Yes** to upload your Answer on the next screen.
- 
- Tap **No** if you do not plan to create an answer and you understand that by doing so you will limit the effectiveness of this motion.
-yesno: answer_help
+# Tap **Yes** to upload your Answer on the next screen.
+#Tap **No** if you do not plan to create an answer and you understand that by doing so you will limit the effectiveness of this motion.
+field: answer_help
+buttons: 
+  - "Upload answer": True
+  - "Skip": False
+terms: 
+  Answer: |
+    An Answer is a document you file with the court that explains why you should not be evicted.  
+    Your Answer can also include counterclaims you may have against your landlord.
 ---
 id: answer upload
 question: |
@@ -259,7 +267,7 @@ subquestion: |
   % if answer_yesno:
   Write a few short sentences that sum up the reason you gave in your Answer.
   % else:
-  Write a few short sentences that sum up the reason you plan to give in your Answer.
+  Write a few short sentences that sum up the reason you plan to give. 
   % endif
 fields: 
   - no label: stated_legaldefense
@@ -290,7 +298,7 @@ choices:
 ---
 id: service date
 question: | 
-  When will you deliver this motion to the ${ other_party } 
+  When will you deliver this motion to ${ other_party }?
 fields:
   - "I don't know when I will deliver this motion": idk_service_date
     datatype: yesno
@@ -332,30 +340,38 @@ code: |
 #    If you have not yet filed an Answer. Use [MADE](https://www.masslegalhelp.org/housing/eviction-answer-interview) to build your answer, save it to your phone or computer and upload it on the next screen so you can it with this motion.
 #    % endif
 ---
-id: exit screen 2
-continue button field: exitscreen
-question: |
- Almost finished 
-subquestion: |
-  You can download your motion on the next screen.
-  
-  The file you download includes instructions for next steps.
+#id: exit screen 2
+#continue button field: exitscreen
+#question: |
+# Almost finished 
+#subquestion: |
+#  You can download your motion on the next screen.
+#  
+#  The file you download includes instructions for next steps.
     
-  % if not answer_yesno:
-  If you have not yet filed an Answer. Use [MADE](https://www.masslegalhelp.org/housing/eviction-answer-interview) to build your answer, save it to your phone or computer and upload it on the next screen so you can it with this motion. 
-  % endif
-  % if date_to_file > today():
-  You are filing 10 days after the default judgment which means you must ask a judge to **stay the execution** (stop the eviction) until this motion is heard.
-  % endif
+# % if not answer_yesno:
+# If you have not yet filed an Answer. Use [MADE](https://www.masslegalhelp.org/housing/eviction-answer-interview) to build your answer, save it to your phone or computer and upload it on the next screen so you can it with this motion. 
+#  % endif
+#  % if date_to_file > today():
+#  You are filing 10 days after the default judgment which means you #must ask a judge to **stay the execution** (stop the eviction) until this motion is heard.
+# % endif
 ---
 id: download
-continue button field: download
+event: download
 question: |
   Your forms are ready to download
 subquestion: |  
+  % if not answer_yesno and not answer_help:
+  If you have not yet filed an Answer use the [Massachusetts Defense for Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview) tool to build your answer to give to the court with this Motion to Remove Default and Vacate Judgement.
+  % endif
+  
+  Print or save your documents and the instructions. The instructions sheet includes your next steps. 
   ${ al_user_bundle.download_list_html( key='final' ) }
   
   ${ al_user_bundle.send_button_html( key='final' ) }
+buttons:
+  - Exit: exit
+  - Restart: restart
 ---
 event: made_screen
 question: |
@@ -368,65 +384,51 @@ question: |
 subquestion: |
   Here is a preview of the form you will sign on the next page.  
   
-  Don't forget to come back to this page to click to the final step of signing and sending the form to the court. 
+  Remember to come back to this window to continue and sign your form.
 
-  ${ al_user_bundle.as_pdf( key='preview' ) }
+  ${ al_court_bundle.as_pdf( key='preview' ) }
 
   Click the image to open it in a new tab.
-  
-  Remember to come back to this window to continue and sign your form.
-  
 progress: 95
----
-id: download form
-event: download
-decoration: file-download
-question: |
-  % if not defined('email_success') or not email_success:
-  Review, download, and send form
-  % else:
-  Form delivered
-  % endif
-subquestion: |
-  % if not defined('email_success') or not email_success:
-  Thank you ${users[0]}. Your form is ready to send to the court. 
+#---
+#id: download form
+#event: download
+#decoration: file-download
+#question: |
+#  Review, download, and file form
+#subquestion: |
+#  % if not defined('email_success') or not email_success:
+#  Thank you ${users[0]}. Your form is ready to send to the court. 
+#  
+#  **It is not delivered until you complete the delivery process #below.**
+#  1. Click the preview image below to open the form in a new window.
+#  2. Download and save or print a copy of this form for your 
+#  records.
+#  3. Click the "Submit to ${trial_court}" button to send it to the #court. 
+#  4. You will have a chance to add instructions to the clerk and #see the cover page before final delivery.
+##  % else:
+##  If you do not hear from the court in 1 business day, call the Trial Court's Emergency HelpLine 833-91-COURT (833-912-6878).
+#  
+##  The Emergency HelpLine is open:  
+##  8:30am - 4:30pm,   
+#  Monday - Friday.
+#  % endif
+#  
+#  ${ al_user_bundle.download_list_html( key='final' ) }
+#  
   
-  **It is not delivered until you complete the delivery process below.**
-  1. Click the preview image below to open the form in a new window.
-  2. Download and save or print a copy of this form for your 
-  records.
-  3. Click the "Submit to ${trial_court}" button to send it to the court. 
-  4. You will have a chance to add instructions to the clerk and see the cover page before final delivery.
-  % else:
-  If you do not hear from the court in 1 business day, call the Trial Court's Emergency HelpLine 833-91-COURT (833-912-6878).
-  
-  The Emergency HelpLine is open:  
-  8:30am - 4:30pm,   
-  Monday - Friday.
-  % endif
-  
-  ${ al_user_bundle.download_list_html( key='final' ) }
-  
-  
-  % if not defined('email_success') or not email_success:
-    ${ action_button_html( url_action('form_delivery_complete'), id_tag="submitToCourt", label="Submit to " + str(trial_court), icon=send_icon, size="md", color="primary")}
-    
-  Or download/email below:
-  % else:
-    Your email has already been delivered to ${trial_court}
-    
-    
-  [:file-download: Download with cover page](${ al_court_bundle.url_for()})  
-  % endif
-progress: 100
-section: download
----
-#code: |
- # = pdf_concatenate(preview_doc)
----
-#attachment:
-# docx template file: Motion_To_Vacate_Form.docx
-# variable name: preview_doc
+##  % if not defined('email_success') or not email_success:
+##    ${ action_button_html( url_action('form_delivery_complete'), #id_tag="submitToCourt", label="Submit to " + str(trial_court), icon=send_icon, size="md", color="primary")}
+#    
+#  Or download/email below:
+#  % else:
+#    Your email has already been delivered to ${trial_court}
+#    
+#    
+#  [:file-download: Download with cover page](${ al_court_bundle.url_for()})  
+#  % endif
+#progress: 100
+#section: download
 ---
 #code: |
 #  if (not answer_yesno) and answer_help: 
@@ -446,17 +448,15 @@ code: |
 attachment:
   - variable name: motion_attachment[i]
     docx template file: Motion_To_Vacate_Form.docx
-  - name: Post interview instructions
-    filename: Post-interview-instructions     
-    variable name: post_interview_instructions[i]        
+  - variable name: post_interview_instructions[i]      
     docx template file: next_steps_motion_to_vacate.docx
 --- 
 objects: 
   - al_court_bundle: ALDocumentBundle.using(enabled=True, elements=[motion_attachment, answer_attachment], filename="Motion_To_Vacate_Form.pdf", title="Motion to Vacate Housing send to the court")
-  - al_user_bundle: ALDocumentBundle.using(elements=[motion_attachment, answer_attachment], filename="Motion_To_Vacate_Form.pdf", title="Form to download")
+  - al_user_bundle: ALDocumentBundle.using(elements=[motion_attachment,answer_attachment,post_interview_instructions], filename="Motion_To_Vacate_Form.pdf", title="Download your documents")
 ---
 objects: 
   - motion_attachment: ALDocument.using( enabled=True, has_addendum=False, title='Motion to Remove Default and Vacate Judgement', filename='Motion_To_Vacate_Form.pdf' )
-  - post_interview_instructions: ALDocument.using(title="Instructions", filename="next_steps_motion_to_vacate.docx", enabled=True, has_addendum=False)
+  - post_interview_instructions: ALDocument.using( enabled=True, has_addendum=False, title='Instructions', filename='next_steps_motion_to_vacate.docx')
   
   
