@@ -78,7 +78,7 @@ code: |
       ]
 ---
 code: |
-  interview_short_title = "Ask the court to remove the Default Judgment in my eviction case"
+  interview_short_title = "Ask the court to remove the Default Judgment in your eviction case"
 ---
 id: intro screen
 question: |
@@ -93,7 +93,7 @@ subquestion: |
   * you missed the hearing for a good reason, and
   *	you also have {a defense} for why your landlord should not evict you.
 
-  We can help you file a Motion to Remove Default and Vacate Judgment.   If the court allows your motion, you start your eviction case over, from the beginning.
+  We can help you file a Motion to Remove Default and Vacate Judgment. If you win your motion the judge will remove the default in your case and allow you to have a trial. 
 
 continue button field: remove_default_intro
 terms: 
@@ -106,7 +106,7 @@ id: confirm has judgement
 question: | 
   Do you have your Judgment in front of you?
 subquestion: | 
-  You need your Judgment of Summary Process by Default in front of you to complete this motion. 
+  You need your Judgment of Summary Process by Default in front of you to complete this interview. 
 yesno: have_judgment 
 ---
 id: kickout no judgment
@@ -116,9 +116,36 @@ question: |
 subquestion: |
   To answer the questions or fill out a Motion to Vacate Default Judgment you need information that is in the Judgment of Summary Process by Default. 
   
-  If you do not have the judgment, call the clerk at the court that heard your case. Ask them how you can get a copy of the judgment.
+  If you do not have the judgment, call the clerk at the court that heard your case. Ask them how to get a copy of the judgment.
 buttons:
   - Exit: exit
+  - Restart: restart
+---
+id: call the clerk
+event: clerk_info
+question: | 
+  Call the court clerk at ${ trial_court }
+subquestion: | 
+  Call the clerk at the ${ trial_court } [BR]
+  ${ showifdef('trial_court.phone_number') }[BR]
+  
+  Ask the clerk how you can get a copy of the judgement. [BR]
+  
+  If you cannot get an actual copy you will need the following information: 
+  * The plaintiff’s name in your case
+  * The docket number for your case
+  * Which court is your case in 
+  * The date of the Default Judgment
+  * If a notice from a sheriff or constable that says you will be “removed has been issued 
+  * If a notice from the sherrif of constable has been issued, when does the notice say the sheriff or constable will move you out
+  * How to deliver the motion to remove default and vacate judgement to the court and to the defendant
+  
+  If you need to go to the court to pick up a copy of the judgement it is located at:
+  ${ trial_court.address }
+  
+  
+buttons: 
+  - Exit: exit 
     url: https://masslegalhelp.org/housing/lt1-chapter-12-challenging-court-ordered-eviction
   - Restart: restart
 ---
@@ -146,7 +173,7 @@ id: other party info
 question: |
   What is the plaintiff's name in your case?
 subquestion: |
-  Look at your default judgment. 
+  Look at your default judgment.
   
   [${default_plaintiff_image.show(width='35em')}](${default_plaintiff_image.url_for()})
 
@@ -171,7 +198,7 @@ subquestion: |
   
   If you got one of these notices, you can ask the judge to give you more time before the sheriff or constable moves you out. This is called asking for a "stay of execution."
   
-  **Did you get a notice of removal from a sheriff or constable?**
+  **Did you get a notice from a sheriff or constable?**
   
 yesno: sheriff_notice
 ---
@@ -218,7 +245,7 @@ subquestion: |
   
   Your Answer can also include {counterclaims} you may have against your landlord.
   
-   ${users[0].familiar()}, did you already file your Answer?
+   **${users[0].familiar()}, did you already file your Answer?**
 yesno: answer_yesno
 terms:
   counterclaims: |
@@ -232,11 +259,11 @@ terms:
 --- 
 id: filing a future answer
 question: |
-  It is strongly encouraged that you file an {Answer}
+  It is strongly encouraged that you file an {Answer} now
 subquestion: |
   This motion will be even more effective if you write an {Answer} tell the court why you should not be evicted.
   
-  **How to file an answer:**
+  **How to file an answer now:**
 
   1. Use the [Massachusetts Defense for Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview) interview to build your Answer.
   2. Save the file on your computer or phone.
@@ -382,13 +409,12 @@ continue button field: preview_screen
 question: |
   Preview your form before you sign it
 subquestion: |
-  Here is a preview of the form you will sign on the next page.  
+  Here is a preview of the form you will sign on the next page. Click the image to open it in a new tab. 
   
   Remember to come back to this window to continue and sign your form.
 
   ${ al_court_bundle.as_pdf( key='preview' ) }
 
-  Click the image to open it in a new tab.
 progress: 95
 #---
 #id: download form
