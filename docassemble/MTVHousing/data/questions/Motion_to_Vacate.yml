@@ -319,9 +319,10 @@ subquestion: |
   If the other party(s) do not have an attorney, you are required to serve a copy on the self-represented party.
 field: service_choice
 choices: 
+  - "I don't know how I will deliver this motion": idk_service_method
   - Deliver by hand: delivered 
   - Deliver by mail: mailed
-  - "I don't know how I will deliver this motion": idk_service_method
+
 ---
 id: service date
 question: | 
