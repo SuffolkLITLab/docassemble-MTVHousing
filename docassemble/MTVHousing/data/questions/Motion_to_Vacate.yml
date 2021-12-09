@@ -69,6 +69,14 @@ code: |
   users.there_is_another = False
   basic_questions_signature_flow
   users[0].signature
+  store_variables_snapshot({
+    'zip': users[0].address.zip,
+    'city': users[0].address.city,
+    'sheriff_notice': sheriff_notice,
+    'trial_court': str(trial_court),
+    'reason_for_missing': comma_list(reason_for_missing.true_values()),
+    'answer_yesno': answer_yesno
+  })
   # if date_to_file > today():
   #   exitscreen_before10
   # else:
