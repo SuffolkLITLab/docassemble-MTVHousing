@@ -21,6 +21,14 @@ code: |
 metadata:
   title: |
     Motion to Vacate Default (Housing)
+  authors:
+    - Michael Cronin
+    - Aubrie Souza
+    - Mia Bonardia
+    - Caroline Robinson
+---
+code: |
+  github_repo_name = "docassemble-MTVHousing"
 ---
 id: order block
 mandatory: True
@@ -78,7 +86,7 @@ code: |
       ]
 ---
 code: |
-  interview_short_title = "Ask the court to remove the Default Judgment in your eviction case"
+  interview_short_title = "Ask the court to remove a default judgment in your eviction case"
 ---
 id: intro screen
 question: |
@@ -397,9 +405,9 @@ subquestion: |
   ${ al_user_bundle.download_list_html( key='final' ) }
   
   ${ al_user_bundle.send_button_html( key='final' ) }
-buttons:
-  - Exit: exit
-  - Restart: restart
+#buttons:
+#  - Exit: exit
+#  - Restart: restart
 ---
 event: made_screen
 question: |
