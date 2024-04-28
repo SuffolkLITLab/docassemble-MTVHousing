@@ -45,7 +45,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
 setup(name='docassemble.MTVHousing',
       version='1.0.2',
       description=('A docassemble extension.'),
-      long_description='# docassemble.MotiontovacateDefaultJudgment\r\n\r\nA docassemble extension.\r\n\r\n## Author\r\n\r\nMichael Cronin, mcronin@su.suffolk.edu\r\n\r\n',
+      long_description='# docassemble.MTVHousing\r\n\r\nA docassemble extension.\r\n\r\n## Author\r\n\r\nMichael Cronin, mcronin@su.suffolk.edu\r\n\r\n',
       long_description_content_type='text/markdown',
       author='Michael Cronin',
       author_email='mcronin@su.suffolk.edu',
