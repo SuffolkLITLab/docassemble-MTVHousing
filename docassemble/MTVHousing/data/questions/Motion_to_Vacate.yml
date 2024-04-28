@@ -24,8 +24,46 @@ metadata:
   authors:
     - Michael Cronin
     - Aubrie Souza
-    - Mia Bonardia
+    - Mia Bonardi
     - Caroline Robinson
+  description: |
+    If you are a tenant who missed an eviction hearing and the court entered a default judgment 
+    against you, you can use this form to ask the court to remove the default judgment and 
+    give you a new hearing. 
+    
+    This form is for tenants who have a good reason for missing the hearing and a defense for why 
+    they should not be evicted.
+  can_I_use_this_form: |
+    Any tenant who missed an eviction hearing can use this form.
+  before_you_start: |
+    Before you start this form, it can help if you have the decision that the judge made
+    in front of you.
+  maturity: production
+  estimated_completion_minutes: 10
+  estimated_completion_delta: 3
+  languages:
+    - en
+  help_page_url: "https://www.masslegalhelp.org/housing-apartments-shelter/eviction/how-file-motion-remove-default-eviction-case"
+  help_page_title: "How to file a Motion to Remove Default in an eviction case"
+  LIST_topics: 
+    - HO-00-00-00-00
+    - HO-02-00-00-00
+  tags: 
+    - HO-00-00-00-00
+    - HO-02-00-00-00
+  jurisdiction: NAM-US-US+MA
+  original_form: "https://www.masslegalhelp.org/housing-apartments-shelter/eviction/how-file-motion-remove-default-eviction-case"
+  original_form_published_on: 2022-01-01
+  review_date: 2024-04-27
+  form_titles:
+    - Motion to Remove Default
+  form_numbers:
+    - Booklet 6
+  fees:
+    - Filing fee: 0.00
+  update_notes: |    
+    Note that a new version of Legal Tactics is due in 2024 but is unlikely to have any
+    substantive change to this form.
 ---
 code: |
   github_repo_name = "docassemble-MTVHousing"
