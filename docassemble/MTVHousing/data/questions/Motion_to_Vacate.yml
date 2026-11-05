@@ -161,7 +161,9 @@ question: |
   Do you have your Judgment in front of you?
 subquestion: | 
   You need your Judgment of Summary Process by Default in front of you to complete this interview. 
-yesno: have_judgment 
+fields:
+  - no label: have_judgment
+    datatype: yesnoradio
 ---
 id: kickout no judgment
 event: no_judgment
@@ -254,7 +256,9 @@ subquestion: |
   
   **Did you get a notice from a sheriff or constable?**
   
-yesno: sheriff_notice
+fields:
+  - no label: sheriff_notice
+    datatype: yesnoradio
 ---
 id: removal notice date and time
 question: |
@@ -300,7 +304,9 @@ subquestion: |
   Your Answer can also include {counterclaims} you may have against your landlord.
   
    **${users[0].familiar()}, did you already file your Answer?**
-yesno: answer_yesno
+fields:
+  - no label: answer_yesno
+    datatype: yesnoradio
 terms:
   counterclaims: |
     You can sue your landlord for money as part of your eviction case if your claims are related to your tenancy. These claims are called "counterclaims" if you raise them during an eviction case. They are claims for money. Common counterclaims tenants can bring against their landlord in an eviction case are:
@@ -456,6 +462,7 @@ subquestion: |
 #  - Restart: restart
 ---
 event: made_screen
+id: "if you need help or more information about filing an answer see answer to eviction https www masslegalhelp org housing eviction answer interview"
 question: |
   If you need help or more information about filing an answer see [Answer to Eviction](https://www.masslegalhelp.org/housing/eviction-answer-interview).
 ---
